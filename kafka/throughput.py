@@ -82,27 +82,11 @@ def calculate_throughput(B, p_values, Sm, Nb, batchHeaderSize, packetHeaderSize,
 
     return S_r, G_s, R_s, X_sp, X_sm, total_throughput_in_B, total_throughput_in_Messages    
 
-def graphAverageMessageThroughputForDifferentBrokers(data):
+def graph(x, y, xLabel, yLabel):
 
-    for i in data.keys():
-        run = {}
-        run = data[i]
-        average = 0
-        index = 0
-        for run in data[i].keys():
-            average += data[i][run]
-            index += 1
-        average = average / index
-        data[i] = average
-    print(data)
-    print(data.keys())
-
-
-    for i in data.keys():
-        plt.plot(data.keys(), data.values(), label = i)
-    plt.xlabel('amoount of brokers')
-    plt.ylabel('messages/sec')
-    plt.title('Kafka Throughput')
+    plt.plot(x, y, label = i)
+    plt.xlabel(xLabel)
+    plt.ylabel(yLabel)
     plt.show()
 
 
@@ -113,16 +97,31 @@ if __name__ == "__main__":
     with open('kafka/kafka_throughput.csv', 'w') as csvfile:
         writer = csv.writer(csvfile , quotechar='"', quoting=csv.QUOTE_MINIMAL, dialect='excel')
     
-        #this will calculate the throughput for one broker with different p values from 1 to 15
+        #calculate the throughput for one broker with different p values from 1 to 15
         writer.writerow(["calculate the throughput for one broker with different p values from 1 to 15"])
-        resultDifferentPValues = {}
-        for i in range (15):
-            writer.writerow(["brokers: 1   p1: ", i, "   |   ", round(calculate_throughput(1, {"p1": i}, 1024, 5, 128, 64, 2)[-1],1), "messages/sec"])
+        resultDifferentPValuesOneBroker = {}
+        for i in range (1, 16):
+            messages_per_sec = round(calculate_throughput(1, {"p1": i}, 1024, 5, 128, 64, 2)[-1],1)
+            writer.writerow(["brokers: 1   p1: ", i, "   |   ", messages_per_sec, "messages/sec"])
+            resultDifferentPValuesOneBroker[i] = messages_per_sec
+        graph(resultDifferentPValuesOneBroker.keys(), resultDifferentPValuesOneBroker.values(), "p values", "messages/sec")
 
+        #calculate the throughput for 3 brokers with different p values from 1 to 15 randomly distributed between the brokers
+        writer.writerow(["calculate the throughput for 3 brokers with different p values from 1 to 15 randomly distributed between the brokers"])
+        resultDifferentPValuesThreeBrokers = {}
+        for i in range (1, 16):
+            #create a dictionary p_values with the keys p1 to p3 and a random value up to i
+            p_values = {}
+            for j in range(1, 4):
+                p_values[f"p{j}"] = random.randint(1, i)    
+            messages_per_sec = round(calculate_throughput(3, p_values, 1024, 5, 128, 64, 2)[-1],1)
+            writer.writerow(["brokers: 3   p: ", p_values, "   |   ", messages_per_sec, "messages/sec"])
+            resultDifferentPValuesThreeBrokers[i] = messages_per_sec
+        graph(resultDifferentPValuesThreeBrokers.keys(), resultDifferentPValuesThreeBrokers.values(), "p values", "messages/sec")
 
-        #this will calculate the throughput for different brokers with different p values from 1 to
+        #calculate the throughput for different brokers with different p values from 1 to
         writer.writerow(["calculate the throughput for different brokers with different p values from 1 to 15"])
-        result = {}
+        resultDifferentBrokers = {}
         for i in range (1, 16):
             #create a dictionary p_values with the keys p1 to pi and a random value up to i
             resultSingleBroker = {}
@@ -133,10 +132,21 @@ if __name__ == "__main__":
                 messages_per_sec = round(calculate_throughput(i, p_values, 1024, 5, 128, 64, 2)[-1],1)
                 resultSingleBroker[f"run {k}"] = messages_per_sec
                 writer.writerow(["brokers: ",i,"    p: ", p_values, "|   ",messages_per_sec , "messages/sec"])
-            result[f"{i}"] = resultSingleBroker
+            resultDifferentBrokers[f"{i}"] = resultSingleBroker
 
-            
+        #prepare the data for the graph
+        for i in resultDifferentBrokers.keys():
+            run = {}
+            run = resultDifferentBrokers[i]
+            average = 0
+            index = 0
+            for run in resultDifferentBrokers[i].keys():
+                average += resultDifferentBrokers[i][run]
+                index += 1
+            average = average / index
+            resultDifferentBrokers[i] = average    
+    
+    graph(resultDifferentBrokers.keys(), resultDifferentBrokers.values(),"amount of brokers", "messages/sec")
 
 
     
-    graphAverageMessageThroughputForDifferentBrokers(result)           
