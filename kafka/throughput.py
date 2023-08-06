@@ -107,17 +107,13 @@ if __name__ == "__main__":
         graph(resultDifferentPValuesOneBroker.keys(), resultDifferentPValuesOneBroker.values(), "p values", "messages/sec")
 
         #calculate the throughput for 3 brokers with different p values from 1 to 15 randomly distributed between the brokers
-        writer.writerow(["calculate the throughput for 3 brokers with different p values from 1 to 15 randomly distributed between the brokers"])
-        resultDifferentPValuesThreeBrokers = {}
+        writer.writerow(["calculate the throughput for 3 brokers with different p values from 1 to 15"])
+        resultDifferentPValues3Brokers = {}
         for i in range (1, 16):
-            #create a dictionary p_values with the keys p1 to p3 and a random value up to i
-            p_values = {}
-            for j in range(1, 4):
-                p_values[f"p{j}"] = random.randint(1, i)    
-            messages_per_sec = round(calculate_throughput(3, p_values, 1024, 5, 128, 64, 2)[-1],1)
-            writer.writerow(["brokers: 3   p: ", p_values, "   |   ", messages_per_sec, "messages/sec"])
-            resultDifferentPValuesThreeBrokers[i] = messages_per_sec
-        graph(resultDifferentPValuesThreeBrokers.keys(), resultDifferentPValuesThreeBrokers.values(), "p values", "messages/sec")
+            messages_per_sec = round(calculate_throughput(3, {"p1": i, "p2": i, "p3": i}, 1024, 5, 128, 64, 2)[-1],1)
+            writer.writerow(["brokers: 3   p1: ", i, "   |   ", messages_per_sec, "messages/sec"])
+            resultDifferentPValues3Brokers[i] = messages_per_sec
+        graph(resultDifferentPValues3Brokers.keys(), resultDifferentPValues3Brokers.values(), "p values", "messages/sec")
 
         #calculate the throughput for different brokers with different p values from 1 to
         writer.writerow(["calculate the throughput for different brokers with different p values from 1 to 15"])
