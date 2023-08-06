@@ -110,15 +110,18 @@ def graphAverageMessageThroughputForDifferentBrokers(data):
 
 if __name__ == "__main__":
 
-    with open('kafka_throughput.csv', 'w') as csvfile:
+    with open('kafka/kafka_throughput.csv', 'w') as csvfile:
         writer = csv.writer(csvfile , quotechar='"', quoting=csv.QUOTE_MINIMAL, dialect='excel')
     
+        #this will calculate the throughput for one broker with different p values from 1 to 15
+        writer.writerow(["calculate the throughput for one broker with different p values from 1 to 15"])
         resultDifferentPValues = {}
         for i in range (15):
             writer.writerow(["brokers: 1   p1: ", i, "   |   ", round(calculate_throughput(1, {"p1": i}, 1024, 5, 128, 64, 2)[-1],1), "messages/sec"])
 
 
-
+        #this will calculate the throughput for different brokers with different p values from 1 to
+        writer.writerow(["calculate the throughput for different brokers with different p values from 1 to 15"])
         result = {}
         for i in range (1, 16):
             #create a dictionary p_values with the keys p1 to pi and a random value up to i
@@ -131,6 +134,9 @@ if __name__ == "__main__":
                 resultSingleBroker[f"run {k}"] = messages_per_sec
                 writer.writerow(["brokers: ",i,"    p: ", p_values, "|   ",messages_per_sec , "messages/sec"])
             result[f"{i}"] = resultSingleBroker
+
+            
+
+
     
     graphAverageMessageThroughputForDifferentBrokers(result)           
-pp.pprint(result)
