@@ -89,9 +89,6 @@ def graph(x, y, xLabel, yLabel):
     plt.ylabel(yLabel)
     plt.show()
 
-
-
-
 if __name__ == "__main__":
 
     with open('kafka/kafka_throughput.csv', 'w') as csvfile:
