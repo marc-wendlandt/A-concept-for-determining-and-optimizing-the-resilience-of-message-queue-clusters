@@ -26,7 +26,7 @@ def runTest(testID, brokers, messageSize, consumer, producer, queues, duration):
     for i in range(1, brokers + 1):
         uri = f"amqp://rabbit-{i}"
         command = f"docker run -it --rm --network rabbit pivotalrabbitmq/perf-test:latest -mf compact --use-millis --uri {uri}" \
-                  f" -x {producer} -y {consumer} -s {messageSize} --queue-pattern 'perf-test-%d' --queue-pattern-from 1 --queue-pattern-to {queues} -z {duration}"
+                  f" -x {producer} -y {consumer} -s {messageSize} --quorum-queue --queue-pattern 'perf-test-%d' --queue-pattern-from 1 --queue-pattern-to {queues} -z {duration}"
         commands.append(command)
         output_files.append(f"test_{testID}_broker_{i}_of_{brokers}_messageSize_{messageSize}_clients_{producer}_queues_{queues}.txt")
 
@@ -57,21 +57,17 @@ for i in range(2,5):
 
     #run tests
     print("Runing tests")
+    #message size
+    for k in [1, 1000, 8000]:
 
-    #number of brokers
-    for j in range(1, 4):
+        #number of client pairs
+        for l in [1, 4, 16]:
 
-        #message size
-        for k in [1, 1000, 8000]:
+            #Number of queues
+            for m in [2, 8, 16]:
 
-            #number of client pairs
-            for l in [1, 4, 16]:
-
-                #Number of queues
-                for m in [2, 8, 16]:
-
-                    print(f"Run {run} with {i} brokers, message size of {k}b, {l} client pairs and {m} queues ...")
-                    runTest(run, i, k, l, l, m, 10)
-                    print("Test finished")
-                    time.sleep(5)
-                    run += 1
+                print(f"Run {run} with {i} brokers, message size of {k}b, {l} client pairs and {m} queues ...")
+                runTest(run, i, k, l, l, m, 10)
+                print("Test finished")
+                time.sleep(5)
+                run += 1
